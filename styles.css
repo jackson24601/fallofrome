@@ -281,6 +281,37 @@ p {
   stroke-width: 6;
 }
 
+
+.territory[data-owner="gothic"] polygon,
+.territory[data-owner="vandal"] polygon,
+.territory[data-owner="sassanid"] polygon {
+  stroke-dasharray: 10 7;
+}
+
+.territory[data-owner="gothic"] .troop-badge-ring {
+  fill: rgba(96, 51, 41, 0.9);
+}
+
+.territory[data-owner="vandal"] .troop-badge-ring {
+  fill: rgba(77, 72, 42, 0.9);
+}
+
+.territory[data-owner="sassanid"] .troop-badge-ring {
+  fill: rgba(66, 50, 97, 0.9);
+}
+
+.territory.is-legal-attack polygon {
+  filter: drop-shadow(0 0 13px rgba(190, 56, 43, 0.82)) brightness(1.07);
+  stroke: #a52c22;
+  stroke-width: 5;
+}
+
+.territory.is-attack-destination polygon {
+  filter: drop-shadow(0 0 18px rgba(171, 43, 31, 0.9));
+  stroke: #7b1f18;
+  stroke-width: 6;
+}
+
 .territory.is-exhausted .troop-badge-ring {
   fill: rgba(61, 55, 48, 0.74);
 }
@@ -438,6 +469,70 @@ p {
   font-size: 1.1rem;
   font-weight: 800;
   background: rgba(255, 253, 244, 0.92);
+}
+
+
+.attack-form {
+  border-color: rgba(146, 44, 31, 0.28);
+  background: rgba(255, 239, 222, 0.72);
+}
+
+.danger-button {
+  background: linear-gradient(135deg, #a52c22, #4b1814);
+}
+
+.battle-log {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(100, 62, 30, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 253, 244, 0.74);
+}
+
+.battle-log[hidden] {
+  display: none;
+}
+
+.battle-log h4 {
+  margin: 0 0 8px;
+  color: #8d5625;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.battle-log p {
+  margin-bottom: 12px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.battle-rolls {
+  display: grid;
+  gap: 10px;
+}
+
+.roll-group {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 238, 180, 0.5);
+}
+
+.roll-group strong {
+  min-width: 76px;
+  color: #8d5625;
+}
+
+.comparison-list {
+  padding-left: 1.3rem;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .move-form input:focus {

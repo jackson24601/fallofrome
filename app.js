@@ -184,12 +184,40 @@ const startingTroops = {
   aegyptus: 4,
 };
 
+const startingOwners = {
+  britannia: "roman",
+  gallia: "roman",
+  germania: "gothic",
+  hispania: "roman",
+  mauretania: "vandal",
+  italia: "roman",
+  africa: "roman",
+  pannonia: "roman",
+  dacia: "gothic",
+  graecia: "roman",
+  thracia: "roman",
+  asia: "roman",
+  armenia: "sassanid",
+  syria: "roman",
+  aegyptus: "roman",
+};
+
 const players = {
   roman: {
     name: "Roman",
   },
+  gothic: {
+    name: "Gothic Confederation",
+  },
+  vandal: {
+    name: "Vandal Kingdom",
+  },
+  sassanid: {
+    name: "Sassanid Empire",
+  },
 };
 
+const currentPlayerId = "roman";
 const board = document.querySelector("#territories");
 const selectedName = document.querySelector("#territory-name");
 const selectedSummary = document.querySelector("#territory-summary");
@@ -206,16 +234,26 @@ const moveDestinationName = document.querySelector("#move-destination-name");
 const moveAmount = document.querySelector("#move-amount");
 const moveMax = document.querySelector("#move-max");
 const cancelMove = document.querySelector("#cancel-move");
+const attackForm = document.querySelector("#attack-form");
+const attackSourceName = document.querySelector("#attack-source-name");
+const attackDestinationName = document.querySelector("#attack-destination-name");
+const attackAmount = document.querySelector("#attack-amount");
+const attackMax = document.querySelector("#attack-max");
+const cancelAttack = document.querySelector("#cancel-attack");
+const battleLog = document.querySelector("#battle-log");
+const battleSummary = document.querySelector("#battle-summary");
+const battleRolls = document.querySelector("#battle-rolls");
 const endTurn = document.querySelector("#end-turn");
 
 const gameState = {
   turn: 1,
   selectedTerritoryId: "italia",
-  moveSourceId: null,
+  operationSourceId: null,
   moveDestinationId: null,
+  attackDestinationId: null,
   troops: { ...startingTroops },
   movable: { ...startingTroops },
-  owners: Object.fromEntries(territories.map((territory) => [territory.id, "roman"])),
+  owners: { ...startingOwners },
 };
 
 function renderTerritories() {
@@ -316,49 +354,58 @@ function handleTerritoryClick(territoryId) {
 
   previewTerritory(territoryId);
 
-  if (gameState.moveSourceId && gameState.moveDestinationId) {
-    setMoveStatus("Confirm or cancel the current movement order before choosing another territory.");
+  if (hasPendingOrder()) {
+    setMoveStatus("Confirm or cancel the current order before choosing another territory.");
     return;
   }
 
-  if (!gameState.moveSourceId) {
-    selectMoveSource(territoryId);
+  if (!gameState.operationSourceId) {
+    selectOperationSource(territoryId);
     return;
   }
 
-  if (territoryId === gameState.moveSourceId) {
-    setMoveStatus(`${territory.name} is already the source. Choose an adjacent friendly destination.`);
+  if (territoryId === gameState.operationSourceId) {
+    setMoveStatus(`${territory.name} is already the source. Choose an adjacent friendly move or enemy attack target.`);
     return;
   }
 
-  selectMoveDestination(territoryId);
+  selectOperationDestination(territoryId);
 }
 
-function selectMoveSource(territoryId) {
+function selectOperationSource(territoryId) {
   const territory = getTerritory(territoryId);
-  const movableTroops = getMovableTroops(territoryId);
 
-  if (movableTroops <= 0) {
-    setMoveStatus(`${territory.name} has no troops left that can move this turn.`);
-    clearMoveOrder({ preserveStatus: true });
+  if (!isCurrentPlayerTerritory(territoryId)) {
+    setMoveStatus(`${territory.name} is controlled by ${getOwnerName(territoryId)}. Select a Roman territory to act from.`);
+    clearOperationOrder({ preserveStatus: true });
     updateOperationPanel();
     updateTerritoryVisuals();
     return;
   }
 
-  gameState.moveSourceId = territoryId;
-  gameState.moveDestinationId = null;
+  if (gameState.troops[territoryId] <= 0) {
+    setMoveStatus(`${territory.name} has no troops available for orders.`);
+    clearOperationOrder({ preserveStatus: true });
+    updateOperationPanel();
+    updateTerritoryVisuals();
+    return;
+  }
+
+  gameState.operationSourceId = territoryId;
+  const movableTroops = getMovableTroops(territoryId);
+  const movementText = movableTroops > 0
+    ? `${formatTroopUnits(movableTroops)} can still move`
+    : "no troops can move again this turn";
   setMoveStatus(
-    `${territory.name} selected. Choose an adjacent friendly territory to receive up to ${formatTroopUnits(
-      movableTroops,
-    )}.`,
+    `${territory.name} selected. Choose an adjacent friendly territory to move (${movementText}) or an enemy territory to attack.`,
   );
+  hideBattleLog();
   updateOperationPanel();
   updateTerritoryVisuals();
 }
 
-function selectMoveDestination(territoryId) {
-  const source = getTerritory(gameState.moveSourceId);
+function selectOperationDestination(territoryId) {
+  const source = getTerritory(gameState.operationSourceId);
   const destination = getTerritory(territoryId);
 
   if (!isAdjacent(source.id, destination.id)) {
@@ -371,33 +418,62 @@ function selectMoveDestination(territoryId) {
     return;
   }
 
-  if (!areFriendly(source.id, destination.id)) {
-    setMoveStatus(`${destination.name} is not friendly. Attacks will be handled in a later phase.`);
-    updateTerritoryVisuals();
+  if (areFriendly(source.id, destination.id)) {
+    selectMoveDestination(territoryId);
     return;
   }
 
+  selectAttackDestination(territoryId);
+}
+
+function selectMoveDestination(territoryId) {
+  const source = getTerritory(gameState.operationSourceId);
+  const destination = getTerritory(territoryId);
   const maxMovable = getMovableTroops(source.id);
+
   if (maxMovable <= 0) {
-    setMoveStatus(`${source.name} has no troops left that can move this turn.`);
-    clearMoveOrder({ preserveStatus: true });
-    updateOperationPanel();
+    setMoveStatus(`${source.name} has no troops left that can move this turn, but it can still attack adjacent enemies.`);
     updateTerritoryVisuals();
     return;
   }
 
   gameState.moveDestinationId = territoryId;
+  gameState.attackDestinationId = null;
   setMoveStatus(`Movement order ready: ${source.name} to ${destination.name}. Enter how many units to move.`);
+  hideBattleLog();
   updateOperationPanel();
   updateTerritoryVisuals();
   moveAmount.focus();
   moveAmount.select();
 }
 
+function selectAttackDestination(territoryId) {
+  const source = getTerritory(gameState.operationSourceId);
+  const destination = getTerritory(territoryId);
+  const defenderTroops = gameState.troops[destination.id];
+
+  if (defenderTroops <= 0) {
+    setMoveStatus(`${destination.name} has no defending troops. Choose another enemy target.`);
+    updateTerritoryVisuals();
+    return;
+  }
+
+  gameState.attackDestinationId = territoryId;
+  gameState.moveDestinationId = null;
+  setMoveStatus(
+    `Attack order ready: ${source.name} attacks ${destination.name}. Choose how many units will roll as attackers.`,
+  );
+  hideBattleLog();
+  updateOperationPanel();
+  updateTerritoryVisuals();
+  attackAmount.focus();
+  attackAmount.select();
+}
+
 function handleMoveSubmit(event) {
   event.preventDefault();
 
-  const sourceId = gameState.moveSourceId;
+  const sourceId = gameState.operationSourceId;
   const destinationId = gameState.moveDestinationId;
   if (!sourceId || !destinationId) {
     setMoveStatus("Choose a source and destination before moving troops.");
@@ -429,29 +505,177 @@ function handleMoveSubmit(event) {
     gameState.troops[destinationId],
   )}, but only ${formatTroopUnits(destinationMovable)} can move again this turn.`;
 
-  clearMoveOrder();
+  clearOperationOrder();
   previewTerritory(destinationId);
   setMoveStatus(movementSummary);
   updateOperationPanel();
   updateTerritoryVisuals();
 }
 
+function handleAttackSubmit(event) {
+  event.preventDefault();
+
+  const sourceId = gameState.operationSourceId;
+  const destinationId = gameState.attackDestinationId;
+  if (!sourceId || !destinationId) {
+    setMoveStatus("Choose an attacking territory and adjacent enemy target before rolling battle dice.");
+    return;
+  }
+
+  const source = getTerritory(sourceId);
+  const destination = getTerritory(destinationId);
+  const attackingUnits = Number.parseInt(attackAmount.value, 10);
+  const maxAttackers = gameState.troops[sourceId];
+
+  if (!Number.isInteger(attackingUnits) || attackingUnits < 1) {
+    setMoveStatus("Enter at least 1 troop unit to attack with.");
+    return;
+  }
+
+  if (attackingUnits > maxAttackers) {
+    setMoveStatus(`${source.name} only has ${formatTroopUnits(maxAttackers)} available to attack.`);
+    attackAmount.value = String(maxAttackers);
+    return;
+  }
+
+  if (gameState.troops[destinationId] <= 0 || areFriendly(sourceId, destinationId)) {
+    setMoveStatus(`${destination.name} is no longer a valid enemy target.`);
+    clearOperationOrder({ preserveStatus: true });
+    updateOperationPanel();
+    updateTerritoryVisuals();
+    return;
+  }
+
+  const result = resolveBattle(attackingUnits, gameState.troops[destinationId]);
+  applyBattleResult(sourceId, destinationId, attackingUnits, result);
+  showBattleResult(source, destination, attackingUnits, result);
+
+  const captured = gameState.owners[destinationId] === currentPlayerId;
+  clearOperationOrder({ preserveStatus: true });
+  previewTerritory(captured ? destinationId : sourceId);
+  updateOperationPanel();
+  updateTerritoryVisuals();
+}
+
+function resolveBattle(attackerDiceCount, defenderDiceCount) {
+  const attackerRolls = rollDice(attackerDiceCount);
+  const defenderRolls = rollDice(defenderDiceCount);
+  let attackerLosses = 0;
+  let defenderLosses = 0;
+  const comparisons = [];
+
+  for (let index = 0; index < Math.min(attackerRolls.length, defenderRolls.length); index += 1) {
+    const attackerRoll = attackerRolls[index];
+    const defenderRoll = defenderRolls[index];
+    const defenderLoses = attackerRoll > defenderRoll;
+    if (defenderLoses) {
+      defenderLosses += 1;
+    } else {
+      attackerLosses += 1;
+    }
+    comparisons.push({ attackerRoll, defenderRoll, defenderLoses });
+  }
+
+  return {
+    attackerRolls,
+    defenderRolls,
+    comparisons,
+    attackerLosses,
+    defenderLosses,
+  };
+}
+
+function rollDice(count) {
+  return Array.from({ length: count }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => b - a);
+}
+
+function applyBattleResult(sourceId, destinationId, attackingUnits, result) {
+  const attackingSurvivors = attackingUnits - result.attackerLosses;
+
+  gameState.troops[sourceId] -= result.attackerLosses;
+  gameState.troops[destinationId] -= result.defenderLosses;
+  clampMovableTroops(sourceId);
+  clampMovableTroops(destinationId);
+
+  if (gameState.troops[destinationId] > 0) {
+    return;
+  }
+
+  gameState.owners[destinationId] = currentPlayerId;
+  gameState.troops[sourceId] -= attackingSurvivors;
+  gameState.troops[destinationId] = attackingSurvivors;
+  gameState.movable[destinationId] = 0;
+  clampMovableTroops(sourceId);
+}
+
+function showBattleResult(source, destination, attackingUnits, result) {
+  const captured = gameState.owners[destination.id] === currentPlayerId;
+  const defenderName = getOwnerName(destination.id);
+  const attackerCasualties = formatTroopUnits(result.attackerLosses);
+  const defenderCasualties = formatTroopUnits(result.defenderLosses);
+  const captureText = captured
+    ? `${destination.name} has fallen and is now Roman-controlled.`
+    : `${destination.name} remains held by ${defenderName} with ${formatTroopUnits(gameState.troops[destination.id])}.`;
+
+  battleLog.hidden = false;
+  battleSummary.textContent = `${source.name} attacked ${destination.name} with ${formatTroopUnits(
+    attackingUnits,
+  )}. The attacker lost ${attackerCasualties}; the defender lost ${defenderCasualties}. ${captureText}`;
+  battleRolls.innerHTML = "";
+  battleRolls.append(
+    createRollGroup("Attacker", result.attackerRolls),
+    createRollGroup("Defender", result.defenderRolls),
+    createComparisonList(result.comparisons),
+  );
+  setMoveStatus(captureText);
+}
+
+function createRollGroup(label, rolls) {
+  const group = document.createElement("div");
+  group.className = "roll-group";
+  const title = document.createElement("strong");
+  title.textContent = label;
+  const dice = document.createElement("span");
+  dice.textContent = rolls.join(", ");
+  group.append(title, dice);
+  return group;
+}
+
+function createComparisonList(comparisons) {
+  const list = document.createElement("ol");
+  list.className = "comparison-list";
+  comparisons.forEach((comparison) => {
+    const item = document.createElement("li");
+    item.textContent = comparison.defenderLoses
+      ? `${comparison.attackerRoll} beats ${comparison.defenderRoll}: defender loses 1`
+      : `${comparison.defenderRoll} holds against ${comparison.attackerRoll}: attacker loses 1`;
+    list.append(item);
+  });
+  return list;
+}
+
 function endCurrentTurn() {
   gameState.turn += 1;
   gameState.movable = { ...gameState.troops };
-  clearMoveOrder();
+  clearOperationOrder();
+  hideBattleLog();
   setMoveStatus(`Turn ${gameState.turn} has begun. All surviving troops may move once this turn.`);
   updateOperationPanel();
   updateInspector();
   updateTerritoryVisuals();
 }
 
-function clearMoveOrder(options = {}) {
-  gameState.moveSourceId = null;
+function clearOperationOrder(options = {}) {
+  gameState.operationSourceId = null;
   gameState.moveDestinationId = null;
+  gameState.attackDestinationId = null;
   if (!options.preserveStatus) {
-    setMoveStatus("Pick a territory with movable troops to start a movement order.");
+    setMoveStatus("Pick an owned territory to start a movement or attack order.");
   }
+}
+
+function hideBattleLog() {
+  battleLog.hidden = true;
 }
 
 function updateInspector() {
@@ -474,27 +698,42 @@ function updateInspector() {
 function updateOperationPanel() {
   turnNumber.textContent = String(gameState.turn);
 
-  const source = getTerritory(gameState.moveSourceId);
-  const destination = getTerritory(gameState.moveDestinationId);
-  moveForm.hidden = !(source && destination);
+  const source = getTerritory(gameState.operationSourceId);
+  const moveDestination = getTerritory(gameState.moveDestinationId);
+  const attackDestination = getTerritory(gameState.attackDestinationId);
+  moveForm.hidden = !(source && moveDestination);
+  attackForm.hidden = !(source && attackDestination);
 
   if (!source) {
-    moveStep.textContent = "Select a territory with available troops to begin a friendly move.";
+    moveStep.textContent = "Select an owned territory to begin a friendly move or enemy attack.";
     return;
   }
 
-  if (!destination) {
-    moveStep.textContent = `${source.name} is the source. Select an adjacent friendly territory as the destination.`;
+  if (moveDestination) {
+    const maxMovable = getMovableTroops(source.id);
+    moveStep.textContent = `${source.name} -> ${moveDestination.name}: choose how many troop units to move.`;
+    moveSourceName.textContent = source.name;
+    moveDestinationName.textContent = moveDestination.name;
+    moveAmount.max = String(maxMovable);
+    moveAmount.value = String(Math.min(Number.parseInt(moveAmount.value, 10) || 1, maxMovable));
+    moveMax.textContent = `Up to ${formatTroopUnits(maxMovable)} can move from ${source.name} this turn.`;
     return;
   }
 
-  const maxMovable = getMovableTroops(source.id);
-  moveStep.textContent = `${source.name} -> ${destination.name}: choose how many troop units to move.`;
-  moveSourceName.textContent = source.name;
-  moveDestinationName.textContent = destination.name;
-  moveAmount.max = String(maxMovable);
-  moveAmount.value = String(Math.min(Number.parseInt(moveAmount.value, 10) || 1, maxMovable));
-  moveMax.textContent = `Up to ${formatTroopUnits(maxMovable)} can move from ${source.name} this turn.`;
+  if (attackDestination) {
+    const maxAttackers = gameState.troops[source.id];
+    moveStep.textContent = `${source.name} attacks ${attackDestination.name}: choose how many troop units roll attack dice.`;
+    attackSourceName.textContent = source.name;
+    attackDestinationName.textContent = attackDestination.name;
+    attackAmount.max = String(maxAttackers);
+    attackAmount.value = String(Math.min(Number.parseInt(attackAmount.value, 10) || 1, maxAttackers));
+    attackMax.textContent = `Up to ${formatTroopUnits(maxAttackers)} can attack from ${source.name}. ${attackDestination.name} will defend with ${formatTroopUnits(
+      gameState.troops[attackDestination.id],
+    )}.`;
+    return;
+  }
+
+  moveStep.textContent = `${source.name} is the source. Select an adjacent friendly territory to move or an adjacent enemy territory to attack.`;
 }
 
 function updateTerritoryVisuals() {
@@ -505,18 +744,24 @@ function updateTerritoryVisuals() {
     const territory = getTerritory(territoryId);
     const isSelected = territoryId === gameState.selectedTerritoryId;
     const isNeighbor = selectedTerritory?.neighbors.includes(territoryId) ?? false;
-    const isMoveSource = territoryId === gameState.moveSourceId;
+    const isOperationSource = territoryId === gameState.operationSourceId;
     const isMoveDestination = territoryId === gameState.moveDestinationId;
-    const isLegalDestination = gameState.moveSourceId
-      ? isLegalMoveDestination(gameState.moveSourceId, territoryId)
+    const isAttackDestination = territoryId === gameState.attackDestinationId;
+    const isLegalMoveDestination = gameState.operationSourceId
+      ? canMoveTo(gameState.operationSourceId, territoryId)
+      : false;
+    const isLegalAttackDestination = gameState.operationSourceId
+      ? canAttack(gameState.operationSourceId, territoryId)
       : false;
     const movableTroops = getMovableTroops(territoryId);
 
     territoryNode.classList.toggle("is-selected", isSelected);
     territoryNode.classList.toggle("is-neighbor", isNeighbor);
-    territoryNode.classList.toggle("is-move-source", isMoveSource);
+    territoryNode.classList.toggle("is-move-source", isOperationSource);
     territoryNode.classList.toggle("is-move-destination", isMoveDestination);
-    territoryNode.classList.toggle("is-legal-destination", isLegalDestination);
+    territoryNode.classList.toggle("is-attack-destination", isAttackDestination);
+    territoryNode.classList.toggle("is-legal-destination", isLegalMoveDestination);
+    territoryNode.classList.toggle("is-legal-attack", isLegalAttackDestination);
     territoryNode.classList.toggle("is-exhausted", movableTroops === 0);
     territoryNode.dataset.owner = gameState.owners[territoryId];
     territoryNode.querySelector(".troop-count").textContent = String(gameState.troops[territoryId]);
@@ -532,6 +777,13 @@ function updateTerritoryVisuals() {
   });
 }
 
+function hasPendingOrder() {
+  return Boolean(
+    gameState.operationSourceId &&
+      (gameState.moveDestinationId || gameState.attackDestinationId),
+  );
+}
+
 function isAdjacent(sourceId, destinationId) {
   return getTerritory(sourceId)?.neighbors.includes(destinationId) ?? false;
 }
@@ -540,16 +792,36 @@ function areFriendly(sourceId, destinationId) {
   return gameState.owners[sourceId] === gameState.owners[destinationId];
 }
 
-function isLegalMoveDestination(sourceId, destinationId) {
+function canMoveTo(sourceId, destinationId) {
   return (
     sourceId !== destinationId &&
     isAdjacent(sourceId, destinationId) &&
-    areFriendly(sourceId, destinationId)
+    areFriendly(sourceId, destinationId) &&
+    getMovableTroops(sourceId) > 0
   );
+}
+
+function canAttack(sourceId, destinationId) {
+  return (
+    sourceId !== destinationId &&
+    isAdjacent(sourceId, destinationId) &&
+    !areFriendly(sourceId, destinationId) &&
+    isCurrentPlayerTerritory(sourceId) &&
+    gameState.troops[sourceId] > 0 &&
+    gameState.troops[destinationId] > 0
+  );
+}
+
+function isCurrentPlayerTerritory(territoryId) {
+  return gameState.owners[territoryId] === currentPlayerId;
 }
 
 function getMovableTroops(territoryId) {
   return gameState.movable[territoryId] ?? 0;
+}
+
+function clampMovableTroops(territoryId) {
+  gameState.movable[territoryId] = Math.min(getMovableTroops(territoryId), gameState.troops[territoryId]);
 }
 
 function getOwnerName(territoryId) {
@@ -566,7 +838,13 @@ function setMoveStatus(message) {
 
 moveForm.addEventListener("submit", handleMoveSubmit);
 cancelMove.addEventListener("click", () => {
-  clearMoveOrder();
+  clearOperationOrder();
+  updateOperationPanel();
+  updateTerritoryVisuals();
+});
+attackForm.addEventListener("submit", handleAttackSubmit);
+cancelAttack.addEventListener("click", () => {
+  clearOperationOrder();
   updateOperationPanel();
   updateTerritoryVisuals();
 });
