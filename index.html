@@ -36,8 +36,8 @@
             <h2 id="board-title">Imperial Territories</h2>
           </div>
           <p>
-            Hover or focus a territory to preview its region and neighboring
-            connections.
+            Click a territory with movable troops, then click an adjacent
+            friendly territory to organize a troop movement for the turn.
           </p>
         </div>
 
@@ -130,6 +130,65 @@
         </div>
       </section>
 
+      <section class="operations" aria-labelledby="operations-title">
+        <div class="turn-card">
+          <div>
+            <p class="eyebrow">Turn operations</p>
+            <h2 id="operations-title">Movement Phase</h2>
+            <p id="move-step">
+              Select a territory with available troops to begin a friendly move.
+            </p>
+          </div>
+          <div class="turn-actions">
+            <div class="turn-counter">
+              <span>Turn</span>
+              <strong id="turn-number">1</strong>
+            </div>
+            <button id="end-turn" class="action-button" type="button">
+              End Turn
+            </button>
+          </div>
+        </div>
+
+        <div class="operation-grid">
+          <div class="move-card">
+            <h3>How movement works</h3>
+            <ol>
+              <li>Choose the territory you want to move troops from.</li>
+              <li>Choose an adjacent territory controlled by the same side.</li>
+              <li>Enter how many eligible troop units should move.</li>
+            </ol>
+            <p>
+              Troops can move once per turn. Units that arrive in a territory
+              are added to its total, but they do not become movable again until
+              the next turn.
+            </p>
+            <p id="move-status" class="move-status">
+              Italia is selected. Pick a territory with movable troops to start
+              a movement order.
+            </p>
+          </div>
+
+          <form id="move-form" class="move-form" hidden>
+            <p class="eyebrow">Movement order</p>
+            <h3>
+              <span id="move-source-name">Source</span>
+              <span aria-hidden="true"> -&gt; </span>
+              <span id="move-destination-name">Destination</span>
+            </h3>
+            <label for="move-amount">Troop units to move</label>
+            <input id="move-amount" name="move-amount" type="number" min="1" value="1" />
+            <p id="move-max" class="form-note">Up to 1 troop unit can move.</p>
+            <div class="form-actions">
+              <button class="action-button" type="submit">Move Troops</button>
+              <button id="cancel-move" class="ghost-button" type="button">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
       <section class="inspector" aria-live="polite">
         <div>
           <p class="eyebrow">Selected territory</p>
@@ -143,6 +202,14 @@
           <div>
             <dt>Region</dt>
             <dd id="territory-region">Western Empire</dd>
+          </div>
+          <div>
+            <dt>Controller</dt>
+            <dd id="territory-owner">Roman</dd>
+          </div>
+          <div>
+            <dt>Troops</dt>
+            <dd id="territory-troops">4 total, 4 movable</dd>
           </div>
           <div>
             <dt>Neighbors</dt>

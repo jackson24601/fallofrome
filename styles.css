@@ -50,6 +50,7 @@ body::before {
 
 .hero,
 .board-panel,
+.operations,
 .inspector {
   border: 1px solid rgba(255, 224, 164, 0.38);
   border-radius: 28px;
@@ -262,12 +263,226 @@ p {
   stroke-width: 4;
 }
 
+.territory.is-legal-destination polygon {
+  filter: drop-shadow(0 0 12px rgba(255, 246, 168, 0.8)) brightness(1.1);
+  stroke: #fff0a4;
+  stroke-width: 5;
+}
+
+.territory.is-move-source polygon {
+  filter: drop-shadow(0 0 16px rgba(38, 81, 32, 0.85));
+  stroke: #223f1e;
+  stroke-width: 6;
+}
+
+.territory.is-move-destination polygon {
+  filter: drop-shadow(0 0 16px rgba(45, 115, 151, 0.85));
+  stroke: #245d75;
+  stroke-width: 6;
+}
+
+.territory.is-exhausted .troop-badge-ring {
+  fill: rgba(61, 55, 48, 0.74);
+}
+
+.territory .troop-badge {
+  pointer-events: none;
+}
+
+.territory .troop-badge-ring {
+  fill: rgba(43, 28, 17, 0.82);
+  stroke: rgba(255, 238, 180, 0.92);
+  stroke-width: 2;
+}
+
+.territory .troop-count {
+  fill: #fff4c9;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+.territory .movable-count {
+  fill: rgba(44, 27, 16, 0.84);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(255, 242, 200, 0.84);
+}
+
 .labels text {
   fill: rgba(59, 35, 20, 0.34);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 17px;
   font-weight: 800;
   letter-spacing: 0.11em;
+}
+
+
+.operations {
+  margin-top: 22px;
+  padding: 28px 34px;
+}
+
+.turn-card {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.turn-card p {
+  margin-bottom: 0;
+}
+
+.turn-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.turn-counter {
+  min-width: 86px;
+  padding: 12px 16px;
+  border: 1px solid rgba(100, 62, 30, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 248, 229, 0.74);
+  text-align: center;
+}
+
+.turn-counter span {
+  display: block;
+  color: #8d5625;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.turn-counter strong {
+  display: block;
+  margin-top: 2px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.operation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.move-card,
+.move-form {
+  padding: 20px;
+  border: 1px solid rgba(100, 62, 30, 0.2);
+  border-radius: 20px;
+  background: rgba(255, 248, 229, 0.68);
+}
+
+.move-card h3,
+.move-form h3 {
+  margin: 0 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.3rem;
+}
+
+.move-card ol {
+  padding-left: 1.3rem;
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.move-card p {
+  margin-bottom: 0;
+}
+
+.move-status {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-left: 5px solid var(--gold);
+  border-radius: 14px;
+  background: rgba(255, 238, 180, 0.62);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.move-form[hidden] {
+  display: none;
+}
+
+.move-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #8d5625;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.move-form input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 2px solid rgba(86, 49, 26, 0.28);
+  border-radius: 14px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: rgba(255, 253, 244, 0.92);
+}
+
+.move-form input:focus {
+  border-color: var(--gold);
+  outline: 3px solid rgba(201, 154, 63, 0.24);
+}
+
+.form-note {
+  margin: 10px 0 18px;
+  font-size: 0.92rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-button,
+.ghost-button {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.action-button {
+  padding: 12px 18px;
+  color: #fff9de;
+  background: linear-gradient(135deg, #8d5625, #432719);
+  box-shadow: 0 10px 22px rgba(67, 39, 25, 0.22);
+}
+
+.ghost-button {
+  padding: 11px 17px;
+  color: var(--ink);
+  border: 1px solid rgba(86, 49, 26, 0.26);
+  background: rgba(255, 248, 229, 0.72);
+}
+
+.action-button:hover,
+.ghost-button:hover {
+  transform: translateY(-1px);
 }
 
 .inspector {
@@ -324,6 +539,7 @@ p {
 
   .hero,
   .board-panel,
+  .operations,
   .inspector {
     border-radius: 20px;
   }
@@ -355,6 +571,34 @@ p {
   .inspector {
     padding: 24px;
   }
+  .operations {
+    padding: 24px;
+  }
+
+  .turn-card,
+  .turn-actions,
+  .operation-grid {
+    display: block;
+  }
+
+  .turn-actions {
+    margin-top: 18px;
+  }
+
+  .turn-counter {
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .operation-grid {
+    margin-top: 18px;
+  }
+
+  .move-form {
+    margin-top: 16px;
+  }
+
 
   .inspector dl {
     margin-top: 20px;
