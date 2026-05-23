@@ -1,0 +1,362 @@
+:root {
+  color-scheme: light;
+  --ink: #2d1d13;
+  --muted: #6f5944;
+  --panel: rgba(255, 247, 226, 0.88);
+  --panel-strong: #fff3cf;
+  --gold: #c99a3f;
+  --line: rgba(86, 49, 26, 0.38);
+  --west: #d96658;
+  --east: #d9a047;
+  --frontier: #7f9d5a;
+  --sea: #55a5ba;
+  --sea-dark: #2f7e99;
+  --shadow: 0 24px 60px rgba(53, 29, 13, 0.24);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(244, 206, 127, 0.36), transparent 32rem),
+    linear-gradient(135deg, #47311f 0%, #8d6231 46%, #342117 100%);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle, #000 42%, transparent 76%);
+}
+
+.game-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.hero,
+.board-panel,
+.inspector {
+  border: 1px solid rgba(255, 224, 164, 0.38);
+  border-radius: 28px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 32px;
+  align-items: end;
+  padding: 34px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #8d5625;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.6rem, 7vw, 5.8rem);
+  line-height: 0.86;
+  letter-spacing: -0.06em;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 2.4vw, 2.2rem);
+}
+
+p {
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.legend-card {
+  padding: 22px;
+  border: 1px solid rgba(114, 72, 32, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 248, 229, 0.72);
+}
+
+.legend-card h2 {
+  font-size: 1.4rem;
+}
+
+.legend {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(56, 31, 16, 0.4);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.24);
+}
+
+.swatch.west {
+  background: var(--west);
+}
+
+.swatch.east {
+  background: var(--east);
+}
+
+.swatch.frontier {
+  background: var(--frontier);
+}
+
+.swatch.sea {
+  background: var(--sea);
+}
+
+.board-panel {
+  margin-top: 22px;
+  padding: 22px;
+}
+
+.board-heading {
+  display: flex;
+  gap: 24px;
+  align-items: end;
+  justify-content: space-between;
+  padding: 10px 12px 18px;
+}
+
+.board-heading p {
+  max-width: 34rem;
+  margin-bottom: 0;
+}
+
+.map-wrap {
+  overflow: hidden;
+  border: 2px solid rgba(81, 49, 26, 0.45);
+  border-radius: 24px;
+  background: #d2af78;
+}
+
+.board-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sea-shape {
+  fill: rgba(83, 166, 188, 0.66);
+  stroke: rgba(28, 100, 124, 0.44);
+  stroke-width: 4;
+}
+
+.sea-shape--north {
+  fill: rgba(102, 187, 204, 0.52);
+}
+
+.sea-shape--red {
+  fill: rgba(65, 152, 174, 0.52);
+}
+
+.route {
+  fill: none;
+  stroke: rgba(36, 94, 106, 0.62);
+  stroke-dasharray: 11 12;
+  stroke-linecap: round;
+  stroke-width: 4;
+  marker-end: url("#route-arrow");
+}
+
+.route-arrow {
+  fill: rgba(36, 94, 106, 0.72);
+}
+
+.territory {
+  cursor: pointer;
+  outline: none;
+}
+
+.territory polygon {
+  stroke: rgba(63, 33, 18, 0.7);
+  stroke-width: 3;
+  transition:
+    filter 160ms ease,
+    stroke-width 160ms ease,
+    transform 160ms ease;
+}
+
+.territory text {
+  pointer-events: none;
+  fill: rgba(42, 24, 14, 0.86);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-anchor: middle;
+  text-shadow: 0 1px 0 rgba(255, 240, 196, 0.8);
+}
+
+.territory[data-region="west"] polygon {
+  fill: var(--west);
+}
+
+.territory[data-region="east"] polygon {
+  fill: var(--east);
+}
+
+.territory[data-region="frontier"] polygon {
+  fill: var(--frontier);
+}
+
+.territory:hover polygon,
+.territory:focus-visible polygon,
+.territory.is-selected polygon {
+  filter: drop-shadow(0 0 14px rgba(255, 229, 145, 0.9));
+  stroke: #2a170d;
+  stroke-width: 5;
+}
+
+.territory.is-neighbor polygon {
+  filter: brightness(1.08) saturate(1.12);
+  stroke: rgba(255, 244, 195, 0.95);
+  stroke-width: 4;
+}
+
+.labels text {
+  fill: rgba(59, 35, 20, 0.34);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.inspector {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: 30px;
+  align-items: center;
+  margin-top: 22px;
+  padding: 28px 34px;
+}
+
+.inspector p {
+  margin-bottom: 0;
+}
+
+.inspector dl {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.inspector dl div {
+  padding: 16px 18px;
+  border: 1px solid rgba(100, 62, 30, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 248, 229, 0.68);
+}
+
+.inspector dt {
+  color: #8d5625;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.inspector dd {
+  margin: 6px 0 0;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+@media (max-width: 820px) {
+  .game-shell {
+    width: min(100% - 20px, 1180px);
+    padding: 18px 0;
+  }
+
+  .hero,
+  .inspector,
+  .board-heading {
+    display: block;
+  }
+
+  .hero,
+  .board-panel,
+  .inspector {
+    border-radius: 20px;
+  }
+
+  .hero {
+    padding: 24px;
+  }
+
+  .legend-card {
+    margin-top: 22px;
+  }
+
+  .board-panel {
+    padding: 12px;
+  }
+
+  .board-heading {
+    padding: 10px 8px 16px;
+  }
+
+  .map-wrap {
+    overflow-x: auto;
+  }
+
+  .board-map {
+    min-width: 900px;
+  }
+
+  .inspector {
+    padding: 24px;
+  }
+
+  .inspector dl {
+    margin-top: 20px;
+  }
+}
