@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fall of Rome - Board Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Board prototype</p>
+          <h1>Fall of Rome</h1>
+          <p>
+            A Risk-style campaign map centered on the late Roman world. The
+            board below uses the reference image as inspiration for an initial
+            set of playable territories around the Mediterranean.
+          </p>
+        </div>
+        <aside class="legend-card" aria-label="Board legend">
+          <h2>Regions</h2>
+          <ul class="legend">
+            <li><span class="swatch west"></span> Western Empire</li>
+            <li><span class="swatch east"></span> Eastern Empire</li>
+            <li><span class="swatch frontier"></span> Frontier Kingdoms</li>
+            <li><span class="swatch sea"></span> Sea lanes</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="board-panel" aria-labelledby="board-title">
+        <div class="board-heading">
+          <div>
+            <p class="eyebrow">Late antiquity theatre</p>
+            <h2 id="board-title">Imperial Territories</h2>
+          </div>
+          <p>
+            Hover or focus a territory to preview its region and neighboring
+            connections.
+          </p>
+        </div>
+
+        <div class="map-wrap">
+          <svg
+            id="rome-board"
+            class="board-map"
+            viewBox="0 0 1200 760"
+            role="img"
+            aria-labelledby="map-title map-desc"
+          >
+            <title id="map-title">Risk-style board map of the Roman world</title>
+            <desc id="map-desc">
+              A stylized game board of Europe, North Africa, and western Asia
+              divided into late Roman territories.
+            </desc>
+
+            <defs>
+              <radialGradient id="parchment" cx="50%" cy="48%" r="70%">
+                <stop offset="0%" stop-color="#f5e5bd" />
+                <stop offset="72%" stop-color="#d9b67f" />
+                <stop offset="100%" stop-color="#b98b54" />
+              </radialGradient>
+              <filter id="paper-grain">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.9"
+                  numOctaves="2"
+                  stitchTiles="stitch"
+                />
+                <feColorMatrix type="saturate" values="0" />
+                <feComponentTransfer>
+                  <feFuncA type="table" tableValues="0 0.08" />
+                </feComponentTransfer>
+              </filter>
+              <marker
+                id="route-arrow"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" class="route-arrow" />
+              </marker>
+            </defs>
+
+            <rect width="1200" height="760" fill="url(#parchment)" />
+            <rect width="1200" height="760" filter="url(#paper-grain)" />
+
+            <g class="water" aria-hidden="true">
+              <path
+                class="sea-shape"
+                d="M 92 326 C 178 285 256 301 335 325 C 453 361 506 353 633 310 C 755 268 855 270 957 319 C 1043 360 1101 400 1154 466 L 1154 586 C 1046 565 946 560 836 575 C 694 594 580 619 429 604 C 286 590 175 544 74 488 C 40 469 33 417 47 383 C 55 361 70 341 92 326 Z"
+              />
+              <path
+                class="sea-shape sea-shape--north"
+                d="M 55 85 C 167 30 306 29 409 71 C 466 94 514 128 570 142 C 645 161 724 139 806 136 C 923 132 1006 171 1130 166 L 1130 0 L 55 0 Z"
+              />
+              <path
+                class="sea-shape sea-shape--red"
+                d="M 822 608 C 870 583 935 598 974 634 C 1017 674 1058 709 1118 720 L 1118 760 L 771 760 C 772 697 785 634 822 608 Z"
+              />
+            </g>
+
+            <g class="routes" aria-label="Sea lane routes">
+              <path class="route" data-route="Hispania to Italia" d="M 310 431 C 390 414 452 415 535 424" />
+              <path class="route" data-route="Italia to Africa" d="M 565 473 C 549 517 527 551 491 584" />
+              <path class="route" data-route="Italia to Greece" d="M 616 454 C 674 433 724 423 782 423" />
+              <path class="route" data-route="Africa to Egypt" d="M 554 606 C 675 598 784 606 903 620" />
+              <path class="route" data-route="Egypt to Syria" d="M 939 591 C 960 544 983 509 1017 478" />
+            </g>
+
+            <g id="territories" class="territories" aria-label="Playable territories"></g>
+
+            <g class="labels" aria-hidden="true">
+              <text x="244" y="217">GAUL</text>
+              <text x="302" y="411">HISPANIA</text>
+              <text x="548" y="392">ITALIA</text>
+              <text x="770" y="391">GREECE</text>
+              <text x="898" y="330">ASIA MINOR</text>
+              <text x="1018" y="451">SYRIA</text>
+              <text x="915" y="592">EGYPT</text>
+              <text x="450" y="594">AFRICA</text>
+              <text x="617" y="168">DANUBE</text>
+              <text x="875" y="194">BLACK SEA</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section class="inspector" aria-live="polite">
+        <div>
+          <p class="eyebrow">Selected territory</p>
+          <h2 id="territory-name">Roma</h2>
+          <p id="territory-summary">
+            The imperial heartland anchors the Western Empire and links the
+            western provinces to the eastern Mediterranean.
+          </p>
+        </div>
+        <dl>
+          <div>
+            <dt>Region</dt>
+            <dd id="territory-region">Western Empire</dd>
+          </div>
+          <div>
+            <dt>Neighbors</dt>
+            <dd id="territory-neighbors">Italia, Africa, Dalmatia</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
