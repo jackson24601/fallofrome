@@ -164,9 +164,14 @@
               the next turn.
             </p>
             <p id="move-status" class="move-status">
-              Italia is selected. Pick a territory with movable troops to start
-              a movement order.
+              Italia is selected. Pick an owned territory to start a movement or
+              attack order.
             </p>
+            <div id="battle-log" class="battle-log" hidden>
+              <h4>Battle result</h4>
+              <p id="battle-summary">No battle has been fought yet.</p>
+              <div id="battle-rolls" class="battle-rolls"></div>
+            </div>
           </div>
 
           <form id="move-form" class="move-form" hidden>
@@ -182,6 +187,24 @@
             <div class="form-actions">
               <button class="action-button" type="submit">Move Troops</button>
               <button id="cancel-move" class="ghost-button" type="button">
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <form id="attack-form" class="move-form attack-form" hidden>
+            <p class="eyebrow">Attack order</p>
+            <h3>
+              <span id="attack-source-name">Attacker</span>
+              <span aria-hidden="true"> attacks </span>
+              <span id="attack-destination-name">Defender</span>
+            </h3>
+            <label for="attack-amount">Troop units to attack with</label>
+            <input id="attack-amount" name="attack-amount" type="number" min="1" value="1" />
+            <p id="attack-max" class="form-note">Up to 1 troop unit can attack.</p>
+            <div class="form-actions">
+              <button class="action-button danger-button" type="submit">Roll Battle</button>
+              <button id="cancel-attack" class="ghost-button" type="button">
                 Cancel
               </button>
             </div>
