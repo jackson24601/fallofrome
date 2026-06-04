@@ -1,0 +1,11 @@
+{
+  "name": "fall-of-rome",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-playable Risk-style Fall of Rome prototype.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check server.mjs"
+  }
+}

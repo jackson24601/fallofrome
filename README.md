@@ -1,16 +1,29 @@
 # Fall of Rome
 
 A browser-based prototype for a Risk-style strategy game about the fall of
-Rome. The current version focuses on the first playable board concept: a
-stylized late Roman world map with territories, regions, sea lanes, and
-neighbor highlighting.
+Rome. The current version is playable in a web browser with a stylized late
+Roman world map, territories, troop movement, and dice-based attacks.
 
 ## Run locally
 
-Open `index.html` in a browser, or serve the folder with any static web server:
+Use the built-in static server:
 
 ```sh
-python3 -m http.server 8000
+npm start
 ```
 
 Then visit <http://localhost:8000>.
+
+You can also choose a different port:
+
+```sh
+PORT=5173 npm start
+```
+
+## Quick play test
+
+1. Click a Roman-controlled territory.
+2. Click an adjacent friendly territory to move troops, or an adjacent enemy
+   territory to attack.
+3. Enter the number of units for the order and confirm it.
+4. Use **End Turn** to reset which troops can move this turn.
