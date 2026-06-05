@@ -6,11 +6,11 @@
   --panel-strong: #fff3cf;
   --gold: #c99a3f;
   --line: rgba(86, 49, 26, 0.38);
-  --west: #d96658;
-  --east: #d9a047;
-  --frontier: #7f9d5a;
-  --sea: #55a5ba;
-  --sea-dark: #2f7e99;
+  --west: #f4eba8;
+  --east: #b9c9ff;
+  --frontier: #d8d0c4;
+  --sea: #93d0df;
+  --sea-dark: #498fa4;
   --shadow: 0 24px 60px rgba(53, 29, 13, 0.24);
 }
 
@@ -176,7 +176,7 @@ p {
   overflow: hidden;
   border: 2px solid rgba(81, 49, 26, 0.45);
   border-radius: 24px;
-  background: #d2af78;
+  background: var(--sea);
 }
 
 .board-map {
@@ -185,18 +185,34 @@ p {
   height: auto;
 }
 
+.sea-label-shape {
+  fill: transparent;
+}
+
 .sea-shape {
-  fill: rgba(83, 166, 188, 0.66);
-  stroke: rgba(28, 100, 124, 0.44);
-  stroke-width: 4;
+  fill: rgba(125, 195, 214, 0.72);
+  stroke: rgba(45, 126, 151, 0.48);
+  stroke-width: 3;
 }
 
 .sea-shape--north {
-  fill: rgba(102, 187, 204, 0.52);
+  fill: rgba(112, 186, 207, 0.52);
+}
+
+.sea-shape--black {
+  fill: rgba(105, 177, 202, 0.64);
 }
 
 .sea-shape--red {
-  fill: rgba(65, 152, 174, 0.52);
+  fill: rgba(80, 160, 186, 0.58);
+}
+
+.frontier-line {
+  fill: none;
+  stroke: rgba(213, 27, 42, 0.9);
+  stroke-dasharray: 4 8;
+  stroke-linecap: round;
+  stroke-width: 4;
 }
 
 .route {
@@ -282,10 +298,24 @@ p {
 }
 
 
+.territory[data-owner="saxon"] polygon,
+.territory[data-owner="frankish"] polygon,
+.territory[data-owner="alemannic"] polygon,
 .territory[data-owner="gothic"] polygon,
-.territory[data-owner="vandal"] polygon,
-.territory[data-owner="sassanid"] polygon {
+.territory[data-owner="vandal"] polygon {
   stroke-dasharray: 10 7;
+}
+
+.territory[data-owner="saxon"] .troop-badge-ring {
+  fill: rgba(94, 69, 49, 0.95);
+}
+
+.territory[data-owner="frankish"] .troop-badge-ring {
+  fill: rgba(99, 61, 43, 0.95);
+}
+
+.territory[data-owner="alemannic"] .troop-badge-ring {
+  fill: rgba(91, 77, 45, 0.95);
 }
 
 .territory[data-owner="gothic"] .troop-badge-ring {
@@ -294,10 +324,6 @@ p {
 
 .territory[data-owner="vandal"] .troop-badge-ring {
   fill: rgba(77, 72, 42, 0.9);
-}
-
-.territory[data-owner="sassanid"] .troop-badge-ring {
-  fill: rgba(66, 50, 97, 0.9);
 }
 
 .territory.is-legal-attack polygon {
