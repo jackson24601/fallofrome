@@ -1,8 +1,9 @@
 # Fall of Rome
 
 A browser-based prototype for a Risk-style strategy game about the fall of
-Rome. The current version is playable in a web browser with a stylized late
-Roman world map, territories, troop movement, and dice-based attacks.
+Rome. The current version is playable in a web browser with an A.D. 400-style
+Roman dioceses map, Germanic armies massed beyond the frontiers, troop
+movement, and dice-based attacks.
 
 ## Run locally
 
